@@ -28,9 +28,10 @@
 import os
 import json
 import regex as re
+from functools import lru_cache
+
 import requests
 from tqdm import tqdm
-from functools import lru_cache
 
 
 @lru_cache()
