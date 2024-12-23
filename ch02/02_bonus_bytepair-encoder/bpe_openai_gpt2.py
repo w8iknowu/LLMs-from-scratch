@@ -35,14 +35,14 @@ from tqdm import tqdm
 
 
 @lru_cache()
-def bytes_to_unicode():
+def bytes_to_unicode() -> dict[int, str]:
     """
-    Returns list of utf-8 byte and a corresponding list of unicode strings.
-    The reversible bpe codes work on unicode strings.
-    This means you need a large # of unicode characters in your vocab if you want to avoid UNKs.
+    Returns list of utf-8 byte and a corresponding list of Unicode strings.
+    The reversible bpe codes work on Unicode strings.
+    This means you need a large # of Unicode characters in your vocab if you want to avoid UNKs.
     When you're at something like a 10B token dataset you end up needing around 5K for decent coverage.
     This is a significant percentage of your normal, say, 32K bpe vocab.
-    To avoid that, we want lookup tables between utf-8 bytes and unicode strings.
+    To avoid that, we want lookup tables between utf-8 bytes and Unicode strings.
     And avoids mapping to whitespace/control characters the bpe code barfs on.
     """
     bs = list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1))
@@ -71,12 +71,12 @@ def get_pairs(word):
 
 
 class Encoder:
-    def __init__(self, encoder, bpe_merges, errors='replace'):
-        self.encoder = encoder
-        self.decoder = {v: k for k, v in self.encoder.items()}
-        self.errors = errors  # how to handle errors in decoding
-        self.byte_encoder = bytes_to_unicode()
-        self.byte_decoder = {v: k for k, v in self.byte_encoder.items()}
+    def __init__(self, encoder: dict[str, int], bpe_merges, errors: str='replace'):
+        self.encoder: dict[str, int] = encoder
+        self.decoder: dict[int, str] = {v: k for k, v in self.encoder.items()}
+        self.errors: str = errors  # how to handle errors in decoding
+        self.byte_encoder: dict[int, str] = bytes_to_unicode()
+        self.byte_decoder: dict[str, int] = {v: k for k, v in self.byte_encoder.items()}
         self.bpe_ranks = dict(zip(bpe_merges, range(len(bpe_merges))))
         self.cache = {}
 
