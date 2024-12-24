@@ -9,7 +9,7 @@ from bpe_openai_gpt2 import bytes_to_unicode
 ONE_BYTE_ROOM: int = 2 ** 8
 
 
-def inspect_get_word_encoder() -> None:
+def inspect_get_word_encoder() -> dict[str, int]:
     word_encoder_path = Path('./gpt2_model/encoder.json')
     with word_encoder_path.open(mode='r') as f:
         # encoder.json basically is a key-value map,
@@ -27,14 +27,15 @@ def inspect_get_word_encoder() -> None:
     print(f'encoder: {text_encoded}')
     text_decoded = decoder[text_encoded]
     print(f'decoder: {text_decoded}')
+    return encoder
 
 
-def inspect_get_bpe_encoder() -> None:
+def inspect_get_bpe_encoder() -> list[tuple[str, ...]]:
     bpe_encoder_path = Path('./gpt2_model/vocab.bpe')
     with bpe_encoder_path.open(mode='r', encoding='utf-8') as f:
         bpe_data = f.read()
     bpe: list[tuple[str, ...]] = [tuple(x.split()) for x in bpe_data.split('\n')[1:-1]]
-    print(f'bpe len: {len(bpe)}')
+    return bpe
 
 
 def inspect_bytes_to_unicode() -> dict[int, str]:

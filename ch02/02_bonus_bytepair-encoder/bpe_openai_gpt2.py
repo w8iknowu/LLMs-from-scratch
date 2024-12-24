@@ -57,7 +57,7 @@ def bytes_to_unicode() -> dict[int, str]:
     return dict(zip(bs, cs))
 
 
-def get_pairs(word):
+def get_pairs(word) -> set[tuple]:
     """
     Return set of symbol pairs in a word.
     Word is represented as tuple of symbols (symbols being variable-length strings).
@@ -71,55 +71,78 @@ def get_pairs(word):
 
 
 class Encoder:
-    def __init__(self, encoder: dict[str, int], bpe_merges, errors: str='replace'):
+    def __init__(self, encoder: dict[str, int], bpe_merges: list[tuple[str, ...]], errors: str = 'replace'):
         self.encoder: dict[str, int] = encoder
         self.decoder: dict[int, str] = {v: k for k, v in self.encoder.items()}
         self.errors: str = errors  # how to handle errors in decoding
         self.byte_encoder: dict[int, str] = bytes_to_unicode()
         self.byte_decoder: dict[str, int] = {v: k for k, v in self.byte_encoder.items()}
-        self.bpe_ranks = dict(zip(bpe_merges, range(len(bpe_merges))))
+        self.bpe_ranks = dict(zip(bpe_merges, range(len(bpe_merges))))  # vocab.bpe tuple and its number mapping
         self.cache = {}
 
         # Should have added re.IGNORECASE so BPE merges can happen for capitalized versions of contractions
         self.pat = re.compile(r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
 
-    def bpe(self, token):
+    def bpe(self, token: str):
+        """
+        ensure thw token is correctly processed, even it's not in pre-defined vocabulary.
+        """
         if token in self.cache:
             return self.cache[token]
-        word = tuple(token)
-        pairs = get_pairs(word)
+        word = tuple(token)  # this split the string into individual characters
+        pairs: set[tuple] = get_pairs(word)
 
         if not pairs:
+            # usually for syntax
+            print(f'{token} totally not processed.')
             return token
+        print(f'word ready: {word}')
+        print(f'pairs ready: {pairs}')
 
         while True:
-            bigram = min(pairs, key=lambda pair: self.bpe_ranks.get(pair, float('inf')))
+            # take the bpe with smaller index value
+            # before this while-loop, a word is first split into individual chars, and then
+            bigram: tuple | float = min(pairs, key=lambda pair: self.bpe_ranks.get(pair, float('inf')))
+            print(f'processing {pairs}, min is {bigram}')
             if bigram not in self.bpe_ranks:
+                # usually happens when encounter a word not in vocabulary
+                # by this time, this word is already split in a suitable form, and is ready-to-use
+                print(f'{pairs} break\n')
                 break
             first, second = bigram
             new_word = []
             i = 0
+
+            # split word, and put sub-words in new_word
             while i < len(word):
                 try:
+                    # split by sort of punctuation
                     j = word.index(first, i)
-                    new_word.extend(word[i:j])
+                    new_word.extend(word[i:j])  # be aware this is a list operation, not concatenate or join
                     i = j
                 except ValueError:
                     new_word.extend(word[i:])
                     break
 
+                # if found that first and second pair are continuous in this word
                 if word[i] == first and i < len(word) - 1 and word[i + 1] == second:
                     new_word.append(first + second)
                     i += 2
                 else:
                     new_word.append(word[i])
                     i += 1
+            print(f'new word: {new_word}')
+
             new_word = tuple(new_word)
             word = new_word
             if len(word) == 1:
+                # this means the sub-words are become one, this is the final result
+                # this usually happens with a word already in our vocabulary
+                print(f'{word} break with len 1\n')
                 break
             else:
                 pairs = get_pairs(word)
+
         word = ' '.join(word)
         self.cache[token] = word
         return word
@@ -127,7 +150,10 @@ class Encoder:
     def encode(self, text):
         bpe_tokens = []
         for token in re.findall(self.pat, text):
-            token = ''.join(self.byte_encoder[b] for b in token.encode('utf-8'))
+            # use regex to split the text to sub-words
+            # for every sub-word, encode every single char of them, and concatenate them again
+            token: str = ''.join(self.byte_encoder[b] for b in token.encode('utf-8'))
+            print(token)
             bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token).split(' '))
         return bpe_tokens
 
