@@ -1,8 +1,15 @@
+"""
+My code for inspection coressponding to ch03.
+Some matrix operation in original file is implemented with for-loop, easier to understand, but less effective, which is good for learning.
+Here mine is implemented with a more vecotrization way, this is faster in speed, but may make it harder to understand.
+"""
 import torch
 
 
 def inspect_navie_self_attention_single() -> None:
     """
+    Corresponding to Chapter 3.3.1.
+
     A simple self attention example. Calculating self attention for one query.
 
     Example text:
@@ -10,12 +17,12 @@ def inspect_navie_self_attention_single() -> None:
     """
     # 1. A pseudo embeddings for text
     inputs = torch.tensor(
-      [[0.43, 0.15, 0.89], # Your     (x^1)
-       [0.55, 0.87, 0.66], # journey  (x^2)
-       [0.57, 0.85, 0.64], # starts   (x^3)
-       [0.22, 0.58, 0.33], # with     (x^4)
-       [0.77, 0.25, 0.10], # one      (x^5)
-       [0.05, 0.80, 0.55]] # step     (x^6)
+        [[0.43, 0.15, 0.89],  # Your     (x^1)
+         [0.55, 0.87, 0.66],  # journey  (x^2)
+         [0.57, 0.85, 0.64],  # starts   (x^3)
+         [0.22, 0.58, 0.33],  # with     (x^4)
+         [0.77, 0.25, 0.10],  # one      (x^5)
+         [0.05, 0.80, 0.55]]  # step     (x^6)
     )
     print(f'\n===>S1-inputs:\n{inputs}\n')
 
@@ -50,7 +57,7 @@ def inspect_navie_self_attention_single() -> None:
 
     # 4. compute context vector z2
     print(f"inputs' shape: {inputs.shape}")
-    print(f"normalized_attention_score's shape: {weights_to_x2.shape}")
+    print(f"normalized_attention_score's shape: {weights_to_x2.shape}\n")
     """
     after getting the weights from step3, we now multiply every weight to its corresponding input,
     as the following:
@@ -78,6 +85,50 @@ def inspect_navie_self_attention_single() -> None:
     print(f"context_vector's shape: {context_vector.shape}\n")
 
 
-if __name__ == '__main__':
-    inspect_navie_self_attention_single()
+def inspect_naive_self_attention() -> None:
+    """
+    Corresponding to 3.3.2
 
+    A simple self attention example. Calculating self attention for all inputs.
+
+    Example text:
+    "Your journey starts with one step."
+    """
+    # 1. A pseudo embeddings for text
+    inputs = torch.tensor(
+        [[0.43, 0.15, 0.89],  # Your     (x^1)
+         [0.55, 0.87, 0.66],  # journey  (x^2)
+         [0.57, 0.85, 0.64],  # starts   (x^3)
+         [0.22, 0.58, 0.33],  # with     (x^4)
+         [0.77, 0.25, 0.10],  # one      (x^5)
+         [0.05, 0.80, 0.55]]  # step     (x^6)
+    )
+    print(f'\n===>S1-inputs:\n{inputs}\n')
+
+    # 2. Attention score calculation
+    """
+    Now the query become inputs it self,
+    as we need to compute the attention score of every word towards other words in sequence(including itself, of course)
+    """
+    # Here I explictly assign a new parameter to represent it.
+    # To get the matrix product, need to make it transposed.
+    query = inputs.T
+    print(f'\n===>S2-query:\n{query}\n')
+    atten_scores = torch.matmul(inputs, query) 
+    print(f'\n===>S2-attention_scores:\n{atten_scores}\n')
+
+    # 3. Normalization
+    weights = torch.softmax(atten_scores, dim=-1)
+    print(f'\n===>S3-normalized attention scores:\n{weights}\n')
+    # validation
+    for weight in weights:
+        print(weight.sum())
+
+    # 4. Compute context vector of each word
+    context_vectors = torch.matmul(weights, inputs)
+    print(f'\n===>S4-final context vectors:\n{context_vectors}\n')
+
+
+if __name__ == '__main__':
+    # inspect_navie_self_attention_single()
+    inspect_naive_self_attention()
