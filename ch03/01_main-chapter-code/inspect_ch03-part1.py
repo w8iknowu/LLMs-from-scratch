@@ -1,5 +1,6 @@
 """
 My code for inspection coressponding to ch03.
+It's focusing on chapter 3.3, simple self-attention implementation.
 Some matrix operation in original file is implemented with for-loop, easier to understand, but less effective, which is good for learning.
 Here mine is implemented with a more vecotrization way, this is faster in speed, but may make it harder to understand.
 """
