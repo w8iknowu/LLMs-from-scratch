@@ -86,11 +86,16 @@ def inspect_self_attention_weights_naive() -> None:
     show_tensor_info(attention_score_x2, 'attention x2')
 
     # Step-6. normalize score
+    # after this step, we then get a probability table, telling the relation in the view of x2
+    # BUT keep in mind, this result is just a probability talble, NOT the actual representaion of our inputs.
     d_k = keys.shape[1]  # 2
     atten_weights_x2 = torch.softmax(attention_score_x2 / d_k**0.5, dim=-1)  # (6,)
     show_tensor_info(atten_weights_x2, 'nomalized attention x2')
 
     # Step-7(Final). context vector
+    # Keep in mind that "values" is also one form of our inputs
+    # So by applying such a matrix prodcut transformation, we get a new vector
+    # This vector is still the embedding of our inputs, but in a view of x2
     context_vector_2 = torch.matmul(atten_weights_x2, values)  # (1,6)*(6,2) ==> (1,2)
     show_tensor_info(context_vector_2, "final x2's context vector")
 
