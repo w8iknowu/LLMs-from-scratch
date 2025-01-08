@@ -28,7 +28,7 @@ def inspect_navie_self_attention_single() -> None:
     print(f'\n===>S1-inputs:\n{inputs}\n')
 
     # 2. Taking the second embedding("journey") as the example query
-    query = inputs[1]
+    query = inputs[1]  # (1,3)
     print(f"inputs' shape: {inputs.shape}")
     print(f"query's shape: {query.shape}\n")
     """
@@ -37,6 +37,8 @@ def inspect_navie_self_attention_single() -> None:
     by applying dot product, the relevance of "journey" with other words in sequence can be known.
     bigger value means bigger relevance.
     """
+    # inputs: (6, 3)
+    # query(x2): (3, 1)
     attention_score_x2 = torch.matmul(inputs, query)
     print(f'===>S2-attention score:\n{attention_score_x2}\n')
     print(f"attention's shape: {attention_score_x2.shape}\n")
