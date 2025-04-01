@@ -5,6 +5,8 @@ It's focusing on chapter 3.4, self-attention with trainable weights implementati
 From this part, the familiar "q(uery), k(ey), v(alue)" come out
 
 """
+from typing import Optional
+
 import torch
 
 
@@ -53,7 +55,7 @@ def inspect_self_attention_weights_naive() -> None:
     # Step-3. compute x2's query vector
     # this is just transforming the x2, from its original three-dimension vector,
     # to a new two-dimension vector
-    query_x2 = torch.matmul(x2, w_query) # (3, )*(3, 2) ==> (1, 2)
+    query_x2 = torch.matmul(x2, w_query)  # (3, )*(3, 2) ==> (1, 2)
     show_tensor_info(query_x2, 'query_x2')
 
     # Step-4. all key and value weights computation
@@ -70,7 +72,7 @@ def inspect_self_attention_weights_naive() -> None:
     # To perform query_x2 on the whole keys(transpose)
     # here query_x2 can be seen as a weight(or impact),
     # the weighted result reflects how query_x2 affects(contributes to) the final socre
-    # 
+    #
     # And this how "query" expresses:
     # we want to know x2(query_x2)'s relation with other words in matrix,
     # this is like x2 knocks every word's door and ask, "hi, I just want to know how well we are getting with".
@@ -100,7 +102,7 @@ def inspect_self_attention_weights_naive() -> None:
     show_tensor_info(context_vector_2, "final x2's context vector")
 
 
-def show_tensor_info(tensor_para: torch.Tensor, tensor_name: str = None) -> None:
+def show_tensor_info(tensor_para: torch.Tensor, tensor_name: Optional[str] = None) -> None:
     from textwrap import dedent
     tensor_banner = f'=========={tensor_name}=============='
     banner_size = len(tensor_banner)
@@ -118,4 +120,3 @@ def show_tensor_info(tensor_para: torch.Tensor, tensor_name: str = None) -> None
 
 if __name__ == '__main__':
     inspect_self_attention_weights_naive()
-

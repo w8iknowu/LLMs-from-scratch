@@ -77,7 +77,7 @@ def inspect_navie_self_attention_single() -> None:
         z23 = w1*b1 + w2*c2 + ... + w6*c6
         z2 = {z21, z22, z23}
 
-    so here why do we add the weighted inputs by row? 
+    so here why do we add the weighted inputs by row?
     this is beacause we need to get a "summary" of query(x2 here), this sum is including how every other words
     contributes thier relevance, for a sum, the bigger relevance word will surely contribute more for this value.
     and this final context vector is a new representaiton for x2, which is granted with more info like position,
@@ -117,7 +117,7 @@ def inspect_naive_self_attention() -> None:
     # To get the matrix product, need to make it transposed.
     query = inputs.T
     print(f'\n===>S2-query:\n{query}\n')
-    atten_scores = torch.matmul(inputs, query) 
+    atten_scores = torch.matmul(inputs, query)
     print(f'\n===>S2-attention_scores:\n{atten_scores}\n')
 
     # 3. Normalization
